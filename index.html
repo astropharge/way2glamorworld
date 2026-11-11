@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meja Belajar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e8eef5;--grid:#d3dde9;--ink:#14213d;--muted:#5b6b85;--card:#fff;--line:#c4d0e0;--hl:#ffe45e;--ok:#1f8a5b;--bad:#c0392b}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1626;--grid:#16233a;--ink:#e8eef9;--muted:#93a3bf;--card:#16213a;--line:#2a3a58;--hl:#d9b800;--ok:#4cc38a;--bad:#ff7a6b}}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Bricolage Grotesque",system-ui,sans-serif;color:var(--ink);background-color:var(--bg);
+background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:2.4rem;font-weight:800;margin:0 0 4px;letter-spacing:-.03em}
+h1 span{background:var(--hl);color:#14213d;padding:0 .25em;border-radius:3px}
+.sub{color:var(--muted);margin:0 0 22px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+nav button{font:inherit;font-weight:600;padding:9px 14px;border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--ink);color:var(--bg)}
+section{display:none;background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:20px;box-shadow:5px 5px 0 var(--ink)}
+section.on{display:block}
+h2{margin:0 0 14px;font-size:1.3rem}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea,button.b{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+textarea{width:100%;min-height:110px}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid var(--hl);outline-offset:1px}
+button.b{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600;cursor:pointer}
+button.g{background:transparent;color:var(--ink);border-color:var(--line)}
+.row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px}
+.grow{flex:1;min-width:120px}
+.res{margin-top:16px;padding:14px;border-left:6px solid var(--hl);background:var(--bg);border-radius:6px}
+.big{font-size:2.6rem;font-weight:800;line-height:1}
+.muted{color:var(--muted);font-size:.9rem}
+hr{border:0;border-top:1.5px dashed var(--line);margin:20px 0}
+.mk{display:grid;grid-template-columns:1fr 80px 90px 36px;gap:6px;margin-bottom:6px}
+.mk input,.mk select{width:100%}
+ul{list-style:none;padding:0;margin:12px 0 0}
+li.t{display:flex;gap:10px;align-items:center;padding:10px;border:1.5px solid var(--line);border-radius:8px;margin-bottom:6px}
+li.t.done .tx{text-decoration:line-through;opacity:.5}
+li.t .tx{flex:1}
+.tag{font-size:.75rem;padding:2px 8px;border-radius:99px;border:1.5px solid var(--ink)}
+.p-tinggi{background:var(--hl);color:#14213d}
+.late{color:var(--bad);font-weight:600}
+.timer{font-size:5rem;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-.04em;margin:8px 0}
+.modes{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
+.modes button[aria-pressed=true]{background:var(--hl);color:#14213d;border-color:var(--ink)}
+.out{white-space:pre-wrap;line-height:1.6}
+.err{color:var(--bad)}
+@media(max-width:520px){.mk{grid-template-columns:1fr 64px 80px 32px}.timer{font-size:3.8rem}h1{font-size:1.9rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Meja <span>Belajar</span></h1>
+<p class="sub">Hitung IPK, catat tugas, fokus belajar, dan latihan soal dalam satu halaman.</p>
+
+<nav role="tablist" id="tabs">
+<button role="tab" data-t="ipk" aria-selected="true">Kalkulator IPK</button>
+<button role="tab" data-t="todo" aria-selected="false">Tugas</button>
+<button role="tab" data-t="timer" aria-selected="false">Timer fokus</button>
+<button role="tab" data-t="soal" aria-selected="false">Soal latihan AI</button>
+</nav>
+
+<!-- IPK -->
+<section id="ipk" class="on">
+<h2>Kalkulator IPK</h2>
+<div id="mk"></div>
+<div class="row"><button class="b g" id="addMk">+ Tambah mata kuliah</button><button class="b" id="hitung">Hitung IPS</button></div>
+<div class="res" id="ipsRes"><span class="muted">Isi mata kuliah, SKS, dan nilai, lalu klik Hitung IPS.</span></div>
+<hr>
+<h2>Simulasi target IPK</h2>
+<div class="row">
+<div class="grow"><label for="curIpk">IPK sekarang</label><input id="curIpk" type="number" step="0.01" min="0" max="4" style="width:100%"></div>
+<div class="grow"><label for="curSks">SKS sudah ditempuh</label><input id="curSks" type="number" min="0" style="width:100%"></div>
+<div class="grow"><label for="tgt">IPK target</label><input id="tgt" type="number" step="0.01" min="0" max="4" style="width:100%"></div>
+<div class="grow"><label for="nextSks">SKS semester depan</label><input id="nextSks" type="number" min="1" style="width:100%"></div>
+<button class="b" id="sim">Simulasikan</button>
+</div>
+<div class="res" id="simRes"><span class="muted">Hasilnya menunjukkan IPS minimal yang perlu kamu capai.</span></div>
+<p class="muted">Skala nilai: A 4, A- 3,75, AB 3,5, B+ 3,25, B 3, B- 2,75, C+ 2,25, C 2, D 1, E 0. Sesuaikan dengan aturan kampusmu pada objek <code>SKALA</code> di kode.</p>
+</section>
+
+<!-- TODO -->
+<section id="todo">
+<h2>Daftar tugas</h2>
+<div class="row">
+<div class="grow"><label for="tTxt">Tugas</label><input id="tTxt" style="width:100%" placeholder="Contoh: Laporan praktikum Fisika"></div>
+<div><label for="tDue">Deadline</label><input id="tDue" type="date"></div>
+<div><label for="tPri">Prioritas</label><select id="tPri"><option>rendah</option><option selected>sedang</option><option>tinggi</option></select></div>
+<button class="b" id="tAdd">Tambah</button>
+</div>
+<ul id="tList"></ul>
+<p class="muted" id="tInfo"></p>
+</section>
+
+<!-- TIMER -->
+<section id="timer">
+<h2>Timer fokus (Pomodoro)</h2>
+<div class="modes" id="modes">
+<button class="b g" data-m="25" aria-pressed="true">Fokus 25</button>
+<button class="b g" data-m="5" aria-pressed="false">Istirahat 5</button>
+<button class="b g" data-m="15" aria-pressed="false">Istirahat panjang 15</button>
+</div>
+<div class="timer" id="clock" role="timer" aria-live="off">25:00</div>
+<div class="row" style="justify-content:center">
+<button class="b" id="tgo">Mulai</button><button class="b g" id="trs">Atur ulang</button>
+<div><label for="cust" style="margin:0">Menit kustom</label><input id="cust" type="number" min="1" max="180" style="width:90px"></div>
+</div>
+<p class="muted" style="text-align:center" id="tStat"></p>
+</section>
+
+<!-- AI -->
+<section id="soal">
+<h2>Pembuat soal latihan AI</h2>
+<label for="mat">Tempel materi atau tulis topik</label>
+<textarea id="mat" placeholder="Contoh: Hukum Newton I, II, III beserta penerapannya"></textarea>
+<div class="row" style="margin-top:8px">
+<div><label for="jml">Jumlah soal</label><input id="jml" type="number" min="1" max="20" value="5" style="width:80px"></div>
+<div><label for="tipe">Jenis</label><select id="tipe"><option>pilihan ganda</option><option>esai singkat</option><option>benar/salah</option></select></div>
+<div><label for="lvl">Tingkat</label><select id="lvl"><option>mudah</option><option selected>sedang</option><option>sulit</option></select></div>
+<button class="b" id="gen">Buat soal</button>
+</div>
+<div class="res out" id="aiOut"><span class="muted">Soal beserta kunci jawaban dan pembahasan akan muncul di sini.</span></div>
+<hr>
+<label for="ep">Alamat proxy AI (lihat petunjuk di README)</label>
+<input id="ep" style="width:100%" placeholder="https://nama-proxy-kamu.workers.dev">
+<p class="muted">Jangan pernah menaruh API key di sini. Key disimpan di server proxy.</p>
+</section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* Tab */
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+});
+
+/* IPK */
+const SKALA={"A":4,"A-":3.75,"AB":3.5,"B+":3.25,"B":3,"B-":2.75,"C+":2.25,"C":2,"D":1,"E":0};
+function mkRow(d={}){
+  const r=document.createElement('div');r.className='mk';
+  r.innerHTML=`<input placeholder="Mata kuliah" aria-label="Mata kuliah" value="${d.n||''}"><input type="number" min="1" max="6" placeholder="SKS" aria-label="SKS" value="${d.s||''}"><select aria-label="Nilai">${Object.keys(SKALA).map(k=>`<option ${k===d.g?'selected':''}>${k}</option>`).join('')}</select><button class="b g" aria-label="Hapus">×</button>`;
+  r.querySelector('button').onclick=()=>{r.remove();saveMk()};
+  r.querySelectorAll('input,select').forEach(i=>i.onchange=saveMk);
+  $('#mk').appendChild(r);
+}
+function rows(){return [...document.querySelectorAll('.mk')].map(r=>{const[i,j]=r.querySelectorAll('input');return{n:i.value,s:+j.value,g:r.querySelector('select').value}})}
+function saveMk(){store.set('mk',rows())}
+(store.get('mk',[{},{},{}])).forEach(mkRow);
+$('#addMk').onclick=()=>mkRow();
+$('#hitung').onclick=()=>{
+  const d=rows().filter(x=>x.s>0);saveMk();
+  const sks=d.reduce((a,x)=>a+x.s,0);
+  if(!sks){$('#ipsRes').innerHTML='<span class="err">Isi minimal satu mata kuliah dengan SKS lebih dari 0.</span>';return}
+  const ips=d.reduce((a,x)=>a+x.s*SKALA[x.g],0)/sks;
+  $('#ipsRes').innerHTML=`<div class="big">${ips.toFixed(2)}</div><div class="muted">IPS dari ${sks} SKS</div>`;
+};
+$('#sim').onclick=()=>{
+  const c=+$('#curIpk').value,cs=+$('#curSks').value,t=+$('#tgt').value,n=+$('#nextSks').value;
+  if(!n||!t){$('#simRes').innerHTML='<span class="err">Isi IPK target dan SKS semester depan.</span>';return}
+  const need=(t*(cs+n)-c*cs)/n;
+  let msg;
+  if(need>4)msg=`<span class="err">Target tidak tercapai semester depan (butuh IPS ${need.toFixed(2)}, melebihi 4,00).</span> Coba target lebih rendah atau tambah SKS.`;
+  else if(need<=0)msg='Target sudah aman, berapa pun IPS-mu semester depan.';
+  else msg=`IPS minimal semester depan: <div class="big">${need.toFixed(2)}</div>`;
+  $('#simRes').innerHTML=msg;
+};
+
+/* Tugas */
+let tasks=store.get('tasks',[]);
+function renderT(){
+  const L=$('#tList');L.innerHTML='';
+  const ord={tinggi:0,sedang:1,rendah:2};
+  [...tasks].sort((a,b)=>a.done-b.done||(a.due||'9').localeCompare(b.due||'9')||ord[a.p]-ord[b.p]).forEach(t=>{
+    const late=t.due&&!t.done&&t.due<new Date().toISOString().slice(0,10);
+    const li=document.createElement('li');li.className='t'+(t.done?' done':'');
+    li.innerHTML=`<input type="checkbox" ${t.done?'checked':''} aria-label="Selesai"><span class="tx">${t.x.replace(/</g,'&lt;')}${t.due?`<br><span class="muted ${late?'late':''}">${late?'Terlambat: ':'Tenggat: '}${t.due}</span>`:''}</span><span class="tag p-${t.p}">${t.p}</span><button class="b g" aria-label="Hapus">×</button>`;
+    li.querySelector('input').onchange=e=>{t.done=e.target.checked;sv()};
+    li.querySelector('button').onclick=()=>{tasks=tasks.filter(z=>z!==t);sv()};
+    L.appendChild(li);
+  });
+  const open=tasks.filter(t=>!t.done).length;
+  $('#tInfo').textContent=tasks.length?`${open} tugas belum selesai dari ${tasks.length}.`:'Belum ada tugas. Tambahkan tugas pertamamu di atas.';
+}
+function sv(){store.set('tasks',tasks);renderT()}
+$('#tAdd').onclick=()=>{const x=$('#tTxt').value.trim();if(!x)return;tasks.push({x,due:$('#tDue').value,p:$('#tPri').value,done:false});$('#tTxt').value='';sv()};
+$('#tTxt').onkeydown=e=>{if(e.key==='Enter')$('#tAdd').click()};
+renderT();
+
+/* Timer */
+let mins=25,left=1500,iv=null,sesi=store.get('sesi',{d:'',n:0});
+if(sesi.d!==new Date().toDateString())sesi={d:new Date().toDateString(),n:0};
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function draw(){$('#clock').textContent=fmt(left);document.title=iv?fmt(left)+' · Meja Belajar':'Meja Belajar';$('#tStat').textContent=`Sesi fokus selesai hari ini: ${sesi.n}`}
+function beep(){try{const a=new AudioContext(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();setTimeout(()=>o.stop(),600)}catch(e){}}
+function stop(){clearInterval(iv);iv=null;$('#tgo').textContent='Mulai'}
+function setM(m){stop();mins=m;left=m*60;draw()}
+$('#tgo').onclick=()=>{
+  if(iv){stop();draw();return}
+  const end=Date.now()+left*1000;$('#tgo').textContent='Jeda';
+  iv=setInterval(()=>{
+    left=Math.max(0,Math.round((end-Date.now())/1000));draw();
+    if(!left){stop();beep();if(mins>=20){sesi.n++;store.set('sesi',sesi)}left=mins*60;draw()}
+  },250);
+};
+$('#trs').onclick=()=>setM(mins);
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#modes button').forEach(x=>x.setAttribute('aria-pressed',x===b));setM(+b.dataset.m)});
+$('#cust').onchange=e=>{const v=+e.target.value;if(v>0){document.querySelectorAll('#modes button').forEach(x=>x.setAttribute('aria-pressed','false'));setM(v)}};
+draw();
+
+/* AI */
+$('#ep').value=store.get('ep','');
+$('#ep').onchange=e=>store.set('ep',e.target.value.trim());
+$('#gen').onclick=async()=>{
+  const out=$('#aiOut'),ep=$('#ep').value.trim(),mat=$('#mat').value.trim();
+  if(!mat){out.innerHTML='<span class="err">Tulis materi atau topik dulu.</span>';return}
+  if(!ep){out.innerHTML='<span class="err">Isi alamat proxy AI di bagian bawah. Lihat README untuk cara membuatnya.</span>';return}
+  store.set('ep',ep);
+  const prompt=`Buatkan ${$('#jml').value} soal ${$('#tipe').value} tingkat ${$('#lvl').value} untuk mahasiswa berdasarkan materi berikut. Tulis dalam bahasa Indonesia. Setelah semua soal, beri kunci jawaban dan pembahasan singkat tiap soal.\n\nMateri:\n${mat}`;
+  out.textContent='Sedang membuat soal...';$('#gen').disabled=true;
+  try{
+    const r=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pesan:prompt})});
+    if(!r.ok)throw new Error('Server membalas '+r.status);
+    const d=await r.json();out.textContent=d.jawaban||'Tidak ada jawaban dari server.';
+  }catch(e){out.innerHTML='<span class="err">Gagal menghubungi proxy: '+e.message+'. Periksa alamat proxy dan pengaturan CORS-nya.</span>'}
+  $('#gen').disabled=false;
+};
+</script>
+</body>
+</html>
